@@ -4,28 +4,30 @@ import random
 
 class Grid:
 
-    def __init__(self, (width, height), (cellWidth, cellHeight)):
-        self.width = width
-        self.height = height
-        self.cellWidth = cellWidth
-        self.cellHeight = cellHeight
-        self.cellsGraph = graph.Graph()
-        self.cells = [[]]
-        self.cells = [[0 for x in range(width)] for y in range(height)]
+    def __init__(self, (gridWidth, gridHeight), (cellWidth, cellHeight)):
+        self.gridDimensions = (gridWidth, gridHeight)
+        self.cellDimensions = (cellWidth, cellHeight)
+        self.cells = [[_ for _ in range(gridWidth)] for _ in range(gridHeight)]
         self.cellsVisited = 0
 
-        for row in range(0, height):
-            for col in range(0, width):
-                x = cellWidth * col
-                y = cellHeight * row
-                newCell = cell.Cell((x, y), (self.cellWidth, self.cellHeight))
+        for row in range(gridHeight):
+            for col in range(gridWidth):
+                coordinates = (cellWidth * col, cellHeight * row)
+                self.cells[row][col] = cell.Cell(coordinates, self.cellDimensions)
 
-                self.cells[row][col]
-
-    def existsUnvisitedCells(self):
-        return self.cellsVisited < self.width * self.height
+    def getDimensions(self):
+        return self.gridDimensions
+        
+    def hasUnvisitedCells(self):
+        return self.cellsVisited < self.width() * self.height()
 
     def draw(self, pygame, canvas):
-        for row in range(0, self.height):
-            for col in range(0, self.width):
-                self.cells[row][col].draw(pygame, canvas)
+        for row in self.cells:
+            for cell in row:
+                # Creating actual cell
+                (x, y) = cell.getCoordinates()
+                (w, h) = cell.getDimensions()
+                rect = pygame.Rect(x, y, w, h)
+
+                # Draw cell
+                pygame.draw.rect(canvas, (255, 255, 255), rect, 1)

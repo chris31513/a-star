@@ -43,23 +43,25 @@ def main(args):
     # Get canvas dimensions based on cells width and heigth
     canvasWidth = args.gridWidth * args.cellWidth + 30
     canvasHeigth = args.gridHeight * args.cellHeight + 10
+    canvasDimensions = (canvasWidth, canvasHeigth)
 
     # Generate grid
-    genGrid = grid.Grid(
-                (args.gridWidth, args.gridHeight),
-                (args.cellWidth, args.cellHeight))
+    gridDimensions = (args.gridWidth, args.gridHeight)
+    cellDimensions = (args.cellWidth, args.cellHeight)
+    genGrid = grid.Grid(gridDimensions, cellDimensions)
 
     # Pygame setup
     pygame.init()
-    canvas = pygame.display.set_mode((canvasWidth, canvasHeigth))
+    canvas = pygame.display.set_mode(canvasDimensions)
     pygame.display.set_caption('A* Pathfinding')
 
     done = False
 
     genGrid.draw(pygame, canvas)
+    pygame.display.update()
 
     while not done:
-        event = pygame.even.poll()
+        event = pygame.event.poll()
         if event.type == pygame.QUIT:
             done = True
             pygame.quit()
