@@ -1,16 +1,20 @@
+import math
+import random
 class Cell:
 
-    def __init__(self, (x, y), (width, height)):
+    def __init__(self, (x, y), index):
+        self.index = index
         self.coordinates = (x, y)
-        self.dimensions = (width, height)
         self.visited = False
         self.status = None
+        self.gScore = 0
+        self.hScore = 0
+        self.fScore = float("inf")
+        self.value = 1
+        self.blocked = False
 
     def getCoordinates(self):
         return self.coordinates
-
-    def getDimensions(self):
-        return self.dimensions
 
     def visit(self):
         self.visited = True
