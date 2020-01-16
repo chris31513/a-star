@@ -8,6 +8,8 @@ class Grid:
         self.gridDimensions = (gridWidth, gridHeight)
         self.cellDimensions = (cellWidth, cellHeight)
         self.cells = [[_ for _ in range(gridWidth)] for _ in range(gridHeight)]
+        self.start = None
+        self.goal = None
 
         for r in range(gridHeight):
             for c in range(gridWidth):
@@ -19,15 +21,6 @@ class Grid:
                 index = (r, c)
 
                 self.cells[r][c] = cell.Cell(coordinates, self.cellDimensions, index)
-
-        self.start = self.cells[0][0]
-        self.goal = self.cells[gridHeight - 1][gridWidth - 1]
-
-        self.start.setBGColor((98, 117, 200))
-        self.start.showText = False
-
-        self.goal.setBGColor((98, 117, 200))
-        self.goal.showText = False
 
     def getDimensions(self):
         return self.gridDimensions
@@ -82,36 +75,6 @@ class Grid:
                 if (not self.cells[x][y - 1].isBlocked()) and (not self.cells[x + 1][y].isBlocked()):
                     neighbours.append(self.cells[x + 1][y - 1])
 
-        # n1, n2, n3, n4, n5, n6, n7, n8 = None, None, None, None, None, None, None, None
-        #
-        #
-        # if x - 1 >= 0:
-        #     n4 = self.cells[x - 1][y]
-        #     neighbours.append(n4)
-        #     if y - 1 >= 0:
-        #         n2 = self.cells[x][y - 1]
-        #         neighbours.append(n2)
-        #         if (not n4.isBlocked()) and (not n2.isBlocked()):
-        #             n1 = self.cells[x - 1][y - 1]
-        #             neighbours.append(n1)
-        #     if y + 1 < height:
-        #         if (not n4.isBlocked()) and (not n7.isBlocked()):
-        #             n6 = self.cells[x - 1][y + 1]
-        #             neighbours.append(n6)
-        # if x + 1 < width:
-        #     n5 = self.cells[x + 1][y]
-        #     neighbours.append(n5)
-        #     if y + 1 < height:
-        #         n7 = self.cells[x][y + 1]
-        #         neighbours.append(n7)
-        #         if (not n5.isBlocked()) and (not n7.isBlocked()):
-        #             n8 = self.cells[x + 1][y + 1]
-        #             neighbours.append(n8)
-        #     if y - 1 >= 0:
-        #         if (not n2.isBlocked()) and (not n5.isBlocked()):
-        #             n3 = self.cells[x + 1][y - 1]
-        #             neighbours.append(n3)
-
         return neighbours
 
     def mousePress(self, position):
@@ -131,3 +94,24 @@ class Grid:
         cell.setBGColor((255, 255, 255))
         cell.showText = False
         return cell
+
+    def setStartOrGoal(self, position):
+        (gridWidth, gridHeight) = self.gridDimensions
+        (cellWidth, cellHeight) = self.cellDimensions
+
+        y = position[0]
+        x = position[1]
+
+        row = x // ((gridWidth * cellWidth) // gridWidth)
+        col = y // ((gridHeight * cellHeight) // gridHeight)
+
+        if self.start == None:
+            self.start = self.cells[row][col]
+            self.start.setBGColor((98, 117, 200))
+            self.start.showText = False
+            return self.start
+        elif self.goal == None:
+            self.goal = self.cells[row][col]
+            self.goal.setBGColor((98, 117, 200))
+            self.goal.showText = False
+            return self.goal

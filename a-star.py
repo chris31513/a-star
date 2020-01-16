@@ -74,6 +74,35 @@ def main(args):
 
     sketcher.drawGrid(grid)
 
+    start = False
+    setStartOrGoal = False
+    while not start:
+        ev = pygame.event.get()
+
+        for event in ev:
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if pygame.mouse.get_pressed()[0] and not setStartOrGoal:
+                try:
+                    pos = pygame.mouse.get_pos()
+                    cell = grid.mousePress(pos)
+                    sketcher.updateCell(cell)
+                except AttributeError:
+                    pass
+            elif pygame.mouse.get_pressed()[0]:
+                try:
+                    pos = pygame.mouse.get_pos()
+                    cell = grid.setStartOrGoal(pos)
+                    sketcher.updateCell(cell)
+                except AttributeError:
+                    pass
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    start = True
+                    break
+                elif event.key == pygame.K_s:
+                    setStartOrGoal = not setStartOrGoal
+
     startCell = grid.getStart()
     goalCell = grid.getGoal()
 
@@ -83,32 +112,14 @@ def main(args):
 
     closedSet = [[False for _ in range(args.gridWidth)] for _ in range(args.gridHeight)]
 
-    start = False
     done = False
     state = (openSet, closedSet, done)
 
-    while not start:
-        ev = pygame.event.get()
-
-        for event in ev:
-            if event.type == pygame.QUIT:
-                pygame.quit()
-            if pygame.mouse.get_pressed()[0]:
-                try:
-                    pos = pygame.mouse.get_pos()
-                    cell = grid.mousePress(pos)
-                    sketcher.updateCell(cell)
-                except AttributeError:
-                    pass
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE:
-                    start = True
-                    break
 
     while not done:
         (_, _, done) = aStar(grid, state, sketcher)
 
-    createPath(grid, sketcher, grid.getGoal())
+    createPath(grid, sketcher)
 
 def aStar(grid, (openSet, closedSet, done), sketcher):
 
@@ -124,16 +135,12 @@ def aStar(grid, (openSet, closedSet, done), sketcher):
         # Get cell neighbours
         cellNeighbours = grid.getNeighbours(cell)
 
-        (x, y) = cell.getIndex()
-
         # For each neighbour
         for neighbour in cellNeighbours:
             (nx, ny) = neighbour.getIndex()
 
             # If neighbour is goal, stop search
             if neighbour == grid.getGoal():
-                neighbour.setBGColor((255, 0, 0))
-                sketcher.updateCell(neighbour)
                 neighbour.parent = cell
                 return (None, None, True)
 
@@ -154,14 +161,24 @@ def aStar(grid, (openSet, closedSet, done), sketcher):
                     sketcher.updateCell(neighbour)
                     neighbour.parent = cell
 
+        (x, y) = cell.getIndex()
         closedSet[x][y] = True
+
         cell.setBGColor((215, 61, 124))
         sketcher.updateCell(cell)
 
     return (openSet, closedSet, False)
 
-def createPath(grid, sketcher, goalCell):
+def createPath(grid, sketcher):
+    startCell = grid.getStart()
+    goalCell = grid.getGoal()
+
+    startCell.setBGColor((98, 117, 200))
+    startCell.showText = True
+    sketcher.updateCell(goalCell)
+
     goalCell.setBGColor((98, 117, 200))
+    goalCell.showText = True
     sketcher.updateCell(goalCell)
 
     parent = goalCell.parent

@@ -17,8 +17,7 @@ class Sketcher:
                 # Drawing cell
                 self.pygame.draw.rect(self.canvas, (255, 255, 255), rect, 4)
 
-        self.updateCell(grid.getStart())
-        self.updateCell(grid.getGoal())
+        self.pygame.display.update()
 
     def updateCell(self, cell):
         (x, y) = cell.getCoordinates()
