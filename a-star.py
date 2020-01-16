@@ -1,10 +1,10 @@
-import grid
+import grid as Grid
 import argparse
 import pygame
 import random
 import math
-# from que import PriorityQueue
 import heapq
+import sketcher as Sketcher
 
 def defineArgs():
     parser = argparse.ArgumentParser(
@@ -29,14 +29,14 @@ def defineArgs():
         '-cw', '--cellWidth',
         help='cells width',
         type=int,
-        default=60,
+        default=70,
     )
 
     parser.add_argument(
         '-ch', '--cellHeight',
         help='cells height',
         type=int,
-        default=60,
+        default=70,
     )
 
     return parser.parse_args()
@@ -59,24 +59,25 @@ def main(args):
     # Generate grid
     gridDimensions = (args.gridWidth, args.gridHeight)
     cellDimensions = (args.cellWidth, args.cellHeight)
-    genGrid = grid.Grid(gridDimensions, cellDimensions, canvasOffset)
+    grid = Grid.Grid(gridDimensions, cellDimensions, canvasOffset)
 
     # Pygame setup
     pygame.init()
-    pygame.font.init() # you have to call this at the start,
-                   # if you want to use this module.
-    myfont = pygame.font.SysFont('Comic Sans MS', 20)
+    pygame.font.init()
+
+    font = pygame.font.SysFont('Comic Sans MS', 20)
     canvas = pygame.display.set_mode(canvasDimensions)
     pygame.display.set_caption('A* Pathfinding')
+
+    sketcher = Sketcher.Sketcher(pygame, canvas, font)
 
     # Specifies when the program should finish
     done = False
 
-    genGrid.draw(pygame, canvas)
-    pygame.display.update()
+    sketcher.drawGrid(grid)
 
-    startCell = genGrid.getStart()
-    goalCell = genGrid.getGoal()
+    startCell = grid.getStart()
+    goalCell = grid.getGoal()
 
     # Set of discovered cells, initially with start
     openSet = []
@@ -93,11 +94,11 @@ def main(args):
             pygame.quit()
 
         if state:
-            state = aStar(genGrid, state, pygame, canvas, myfont)
+            state = aStar(grid, state, sketcher)
         else:
             done = True
 
-def aStar(genGrid, (openSet, closedSet), pygame, canvas, font):
+def aStar(grid, (openSet, closedSet), sketcher):
 
     tmpG = 0
     tmpH = 0
@@ -109,29 +110,23 @@ def aStar(genGrid, (openSet, closedSet), pygame, canvas, font):
         (cellFScore, cell) = heapq.heappop(openSet)
 
         # Get cell neighbours
-        cellNeighbours = genGrid.getNeighbours(cell)
+        cellNeighbours = grid.getNeighbours(cell)
 
-        (x, y) = cell.index
-        closedSet[x][y] = True
+        (x, y) = cell.getIndex()
 
         # For each neighbour
         for neighbour in cellNeighbours:
-            # genGrid.color(neighbour, pygame, canvas, (255, 255, 255))
-            (nx, ny) = neighbour.index
-
+            (nx, ny) = neighbour.getIndex()
 
             # If neighbour is goal, stop search
-            if neighbour == genGrid.getGoal():
-                genGrid.color(neighbour, pygame, canvas, (255, 0, 0))
-                pygame.display.update()
+            if neighbour == grid.getGoal():
+                neighbour.setBGColor((255, 0, 0))
+                sketcher.updateCell(neighbour)
                 return
 
-            print(neighbour.index)
-            print(closedSet[nx][ny])
             if (not closedSet[nx][ny]) and (not neighbour.blocked):
-                # print(neighbour.index)
-                tmpG = cell.gScore + neighbour.value
-                tmpH = heuristic(neighbour, genGrid.getGoal())
+                tmpG = cell.getGScore() + neighbour.getValue()
+                tmpH = heuristic(neighbour, grid.getGoal())
 
                 tmpF = tmpG + tmpH
 
@@ -142,8 +137,12 @@ def aStar(genGrid, (openSet, closedSet), pygame, canvas, font):
                     neighbour.hScore = tmpH
                     neighbour.fScore = tmpF
 
-                    genGrid.updateCell(neighbour, (0, 255, 0), pygame, canvas, font)
-            pygame.display.update()
+                    neighbour.setBGColor((0, 255, 0))
+                    sketcher.updateCell(neighbour)
+
+        closedSet[x][y] = True
+        cell.setBGColor((215, 61, 124))
+        sketcher.updateCell(cell)
 
     return (openSet, closedSet)
 
