@@ -12,7 +12,9 @@ class Cell:
         self.value = 1
         self.blocked = False
         self.bgColor = None
-        self.txtColor = (0, 0, 0)
+        self.txtColor = (255, 255, 255)
+        self.showText = True
+        self.parent = None
 
     def getCoordinates(self):
         return self.coordinates

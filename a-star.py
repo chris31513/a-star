@@ -15,28 +15,28 @@ def defineArgs():
         '-gw', '--gridWidth',
         help='grid width',
         type=int,
-        default=10,
+        default=30,
     )
 
     parser.add_argument(
         '-gh', '--gridHeight',
         help='grid heigth',
         type=int,
-        default=10,
+        default=20,
     )
 
     parser.add_argument(
         '-cw', '--cellWidth',
         help='cells width',
         type=int,
-        default=70,
+        default=50,
     )
 
     parser.add_argument(
         '-ch', '--cellHeight',
         help='cells height',
         type=int,
-        default=70,
+        default=50,
     )
 
     return parser.parse_args()
@@ -51,8 +51,9 @@ def main(args):
     # Get canvas dimensions based on cells width and heigth
     extraWidth = 20
     extraHeight = 20
-    canvasWidth = args.gridWidth * args.cellWidth + extraWidth
-    canvasHeigth = args.gridHeight * args.cellHeight + extraHeight
+
+    canvasWidth = (args.gridWidth * args.cellWidth) + extraWidth
+    canvasHeigth = (args.gridHeight * args.cellHeight) + extraHeight
     canvasDimensions = (canvasWidth, canvasHeigth)
     canvasOffset = (extraWidth / 2, extraHeight / 2)
 
@@ -65,14 +66,11 @@ def main(args):
     pygame.init()
     pygame.font.init()
 
-    font = pygame.font.SysFont('Comic Sans MS', 20)
+    font = pygame.font.SysFont(None, 20)
     canvas = pygame.display.set_mode(canvasDimensions)
     pygame.display.set_caption('A* Pathfinding')
 
     sketcher = Sketcher.Sketcher(pygame, canvas, font)
-
-    # Specifies when the program should finish
-    done = False
 
     sketcher.drawGrid(grid)
 
@@ -85,20 +83,34 @@ def main(args):
 
     closedSet = [[False for _ in range(args.gridWidth)] for _ in range(args.gridHeight)]
 
-    state = (openSet, closedSet)
+    start = False
+    done = False
+    state = (openSet, closedSet, done)
+
+    while not start:
+        ev = pygame.event.get()
+
+        for event in ev:
+            if event.type == pygame.QUIT:
+                pygame.quit()
+            if pygame.mouse.get_pressed()[0]:
+                try:
+                    pos = pygame.mouse.get_pos()
+                    cell = grid.mousePress(pos)
+                    sketcher.updateCell(cell)
+                except AttributeError:
+                    pass
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    start = True
+                    break
 
     while not done:
-        event = pygame.event.poll()
-        if event.type == pygame.QUIT:
-            done = True
-            pygame.quit()
+        (_, _, done) = aStar(grid, state, sketcher)
 
-        if state:
-            state = aStar(grid, state, sketcher)
-        else:
-            done = True
+    createPath(grid, sketcher, grid.getGoal())
 
-def aStar(grid, (openSet, closedSet), sketcher):
+def aStar(grid, (openSet, closedSet, done), sketcher):
 
     tmpG = 0
     tmpH = 0
@@ -122,7 +134,8 @@ def aStar(grid, (openSet, closedSet), sketcher):
             if neighbour == grid.getGoal():
                 neighbour.setBGColor((255, 0, 0))
                 sketcher.updateCell(neighbour)
-                return
+                neighbour.parent = cell
+                return (None, None, True)
 
             if (not closedSet[nx][ny]) and (not neighbour.blocked):
                 tmpG = cell.getGScore() + neighbour.getValue()
@@ -139,11 +152,23 @@ def aStar(grid, (openSet, closedSet), sketcher):
 
                     neighbour.setBGColor((0, 255, 0))
                     sketcher.updateCell(neighbour)
+                    neighbour.parent = cell
 
         closedSet[x][y] = True
         cell.setBGColor((215, 61, 124))
         sketcher.updateCell(cell)
 
-    return (openSet, closedSet)
+    return (openSet, closedSet, False)
+
+def createPath(grid, sketcher, goalCell):
+    goalCell.setBGColor((98, 117, 200))
+    sketcher.updateCell(goalCell)
+
+    parent = goalCell.parent
+    while parent != None:
+        parent.setBGColor((98, 117, 200))
+        sketcher.updateCell(parent)
+
+        parent = parent.parent
 
 main(defineArgs())

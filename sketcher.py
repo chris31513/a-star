@@ -22,33 +22,40 @@ class Sketcher:
 
     def updateCell(self, cell):
         (x, y) = cell.getCoordinates()
-        (w, h) = cell.getDimensions()
+        (cW, cH) = cell.getDimensions()
 
         # Coloring cell
         self.pygame.draw.polygon(
             self.canvas,
             cell.getBGColor(),
-            [(x + 2, y + 2), (x + w - 3, y + 2),
-            (x + w - 2, y + h - 3), (x + 3, y + h - 3)]
+            [(x + 2, y + 2), (x + cW - 3, y + 2),
+            (x + cW - 2, y + cH - 3), (x + 3, y + cH - 3)]
         )
 
-        textG = str(int(cell.getGScore()))
-        textH = str(int(cell.getHScore()))
-        textF = None
-        if cell.getFScore() == float("inf"):
-            textF = "inf"
-        else:
-            textF = str(int(cell.getFScore()))
+        if cell.showText:                                   # # # # # # # # # # # # # # #
+            gScore = int(cell.getGScore())                  #                           #
+            hScore = int(cell.getHScore())                  #  TTTT           T    T    #
+            fScore = gScore + hScore                        #  T              T    T    #
+                                                            #  T TTT          TTTTTT    #
+            textG = str(gScore)                             #  T  TT          T    T    #
+            textH = str(hScore)                             #  TTTTT          T    T    #
+            textF = str(fScore)                             #                           #
+                                                            #         TTTTTT            #
+            txtColor = cell.getTxtColor()                   #         T                 #
+                                                            #         TTT               #
+            (fW, fH) = self.font.size(textF)                #         T                 #
+                                                            # # # # # # # # # # # # # # #
+            textsurface = self.font.render(textG, False, txtColor)
+            self.canvas.blit(textsurface,(x + 5, y + 2 + fH * .15))
 
-        txtColor = cell.getTxtColor()
+            (fW, fH) = self.font.size(textH)
 
-        textsurface = self.font.render(textG, False, txtColor)
-        self.canvas.blit(textsurface,(x + 5, y))
+            textsurface = self.font.render(textH, False, txtColor)
+            self.canvas.blit(textsurface,(x + cW - fW - (fW * .50), y + 2 + (fH * .15)))
 
-        textsurface = self.font.render(textH, False, txtColor)
-        self.canvas.blit(textsurface,(x + w - 10, y))
+            (fW, fH) = self.font.size(textF)
 
-        textsurface = self.font.render(textF, False, txtColor)
-        self.canvas.blit(textsurface,(x + w / 2 - 3, y + h / 2))
+            textsurface = self.font.render(textF, False, txtColor)
+            self.canvas.blit(textsurface,(x + cW / 2 - fW / 2, y + cH / 2 - fH / 2))
 
         self.pygame.display.update()
