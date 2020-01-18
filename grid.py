@@ -115,3 +115,26 @@ class Grid:
             self.goal.setBGColor((98, 117, 200))
             self.goal.showText = False
             return self.goal
+
+    def toFile(self, fileName):
+        file = open(fileName, 'w')
+        text = 'A-STAR\n'
+
+        (gw, gh) = self.gridDimensions
+        (cw, ch) = self.cellDimensions
+        text += 'GW {} GH {} CW {} CH {}\n'.format(gw, gh, cw, ch)
+
+        startCell = self.start
+        goalCell = self.goal
+        text += 'S {}\n'.format(startCell.getIndex())
+        text += 'G {}\n'.format(goalCell.getIndex())
+
+        text += 'B'
+        for row in self.cells:
+            for cell in row:
+
+                if cell.isBlocked():
+                    text += ' {}'.format(cell.getIndex())
+
+        file.write(text)
+        file.close()

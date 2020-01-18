@@ -51,3 +51,11 @@ class Cell:
 
     def setTxtColor(self, txtColor):
         self.txtColor = txtColor
+
+    def updateBlockedState(self):
+        if self.blocked:
+            self.bgColor = (255, 255, 255)
+            self.showText = False
+        else:
+            self.bgColor = (0, 0, 0)
+            self.showText = True

@@ -1,9 +1,9 @@
-import grid as Grid
 import argparse
 import pygame
 import random
 import math
 import heapq
+import grid as Grid
 import sketcher as Sketcher
 
 def defineArgs():
@@ -39,6 +39,13 @@ def defineArgs():
         default=50,
     )
 
+    parser.add_argument(
+        '-o', '--output',
+        help='output file',
+        type=str,
+        default='o.star',
+    )
+
     return parser.parse_args()
 
 def heuristic(currentCell, goalCell):
@@ -71,7 +78,6 @@ def main(args):
     pygame.display.set_caption('A* Pathfinding')
 
     sketcher = Sketcher.Sketcher(pygame, canvas, font)
-
     sketcher.drawGrid(grid)
 
     start = False
@@ -120,6 +126,8 @@ def main(args):
         (_, _, done) = aStar(grid, state, sketcher)
 
     createPath(grid, sketcher)
+
+    grid.toFile(args.output)
 
 def aStar(grid, (openSet, closedSet, done), sketcher):
 
