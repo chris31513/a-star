@@ -11,10 +11,12 @@ class Cell:
         self.fScore = float("inf")
         self.value = 1
         self.blocked = False
-        self.bgColor = None
+        self.bgColor = (0, 0, 0)
         self.txtColor = (255, 255, 255)
         self.showText = True
         self.parent = None
+        self.isStart = False
+        self.isGoal = False
 
     def getCoordinates(self):
         return self.coordinates

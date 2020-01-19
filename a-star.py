@@ -5,6 +5,7 @@ import math
 import heapq
 import grid as Grid
 import sketcher as Sketcher
+import re
 
 def defineArgs():
     parser = argparse.ArgumentParser(
@@ -46,6 +47,12 @@ def defineArgs():
         default='o.star',
     )
 
+    parser.add_argument(
+        '-f', '--fromF',
+        help='output file',
+        type=str,
+    )
+
     return parser.parse_args()
 
 def heuristic(currentCell, goalCell):
@@ -56,31 +63,33 @@ def heuristic(currentCell, goalCell):
 def main(args):
 
     # Get canvas dimensions based on cells width and heigth
-    extraWidth = 20
-    extraHeight = 20
+    properties = getProperties(args)
 
-    canvasWidth = (args.gridWidth * args.cellWidth) + extraWidth
-    canvasHeigth = (args.gridHeight * args.cellHeight) + extraHeight
-    canvasDimensions = (canvasWidth, canvasHeigth)
-    canvasOffset = (extraWidth / 2, extraHeight / 2)
+    gridDim = properties['gridDim']
+    cellDim = properties['cellDim']
+    canvasOff = properties['canvasOff']
+    grid = Grid.Grid(gridDim, cellDim, canvasOff)
 
-    # Generate grid
-    gridDimensions = (args.gridWidth, args.gridHeight)
-    cellDimensions = (args.cellWidth, args.cellHeight)
-    grid = Grid.Grid(gridDimensions, cellDimensions, canvasOffset)
+    if args.fromF is not None:
+        grid.setStart(properties['startIndex'])
+        grid.setGoal(properties['goalIndex'])
+
+        for coordinates in properties['blockedCells']:
+            grid.blockCell(coordinates)
 
     # Pygame setup
     pygame.init()
     pygame.font.init()
 
     font = pygame.font.SysFont(None, 20)
-    canvas = pygame.display.set_mode(canvasDimensions)
+    canvasDim = properties['canvasDim']
+    canvas = pygame.display.set_mode(canvasDim)
     pygame.display.set_caption('A* Pathfinding')
 
     sketcher = Sketcher.Sketcher(pygame, canvas, font)
     sketcher.drawGrid(grid)
 
-    start = False
+    start = args.fromF is not None
     setStartOrGoal = False
     while not start:
         ev = pygame.event.get()
@@ -195,5 +204,81 @@ def createPath(grid, sketcher):
         sketcher.updateCell(parent)
 
         parent = parent.parent
+
+def getProperties(args):
+
+    extraWidth = 20
+    extraHeight = 20
+    canvasOff = (extraWidth / 2, extraHeight / 2)
+
+    properties = {'canvasOff' : canvasOff}
+
+    if args.fromF:
+        file = open(args.fromF, "r")
+        try:
+            checkNGet(re.compile('A-STAR'), file, None)
+
+            gW = int(checkNGet(re.compile('GW \d+'), file, (3, None)))
+            gH = int(checkNGet(re.compile('GH \d+'), file, (3, None)))
+            cW = int(checkNGet(re.compile('CW \d+'), file, (3, None)))
+            cH = int(checkNGet(re.compile('CH \d+'), file, (3, None)))
+
+            gridDim = (gW, gH)
+            properties['gridDim'] = gridDim
+
+            cellDim = (cW, cH)
+            properties['cellDim'] = cellDim
+
+            canvasWidth = (gW * cW) + extraWidth
+            canvasHeigth = (gH * cH) + extraHeight
+            canvasDim = (canvasWidth, canvasHeigth)
+            properties['canvasDim'] = canvasDim
+
+            index = checkNGet(re.compile('S \(\d+, \d+\)'), file, (3, -1))
+            startIndex = tuple(int(i) for i in index.split(', '))
+            properties['startIndex'] = startIndex
+
+            index = checkNGet(re.compile('G \(\d+, \d+\)'), file, (3, -1))
+            goalIndex = tuple(int(i) for i in index.split(', '))
+            properties['goalIndex'] = goalIndex
+
+            pairs = checkNGet(re.compile('B *'), file, (3, -1)).split(') (')
+            blockedCells = []
+            for pair in pairs:
+                blockedCells.append(tuple(int(i) for i in pair.split(', ')))
+
+            properties['blockedCells'] = blockedCells
+
+            return properties
+        except Exception as e:
+            print(e)
+        finally:
+            file.close()
+    else:
+        canvasWidth = (args.gridWidth * args.cellWidth) + extraWidth
+        canvasHeigth = (args.gridHeight * args.cellHeight) + extraHeight
+        canvasDim = (canvasWidth, canvasHeigth)
+
+        # Generate grid
+        gridDim = (args.gridWidth, args.gridHeight)
+        cellDim = (args.cellWidth, args.cellHeight)
+
+        properties['gridDim'] = gridDim
+        properties['cellDim'] = cellDim
+        properties['canvasDim'] = canvasDim
+
+        return properties
+
+def checkNGet(regex, file, range = None):
+    toCheck = file.readline().strip()
+
+    if regex.match(toCheck):
+        if range:
+            (fromI, toI) = range
+            return toCheck[fromI:toI]
+        else:
+            return
+    else:
+        raise Exception('Corrupted file in "' + toCheck + '"')
 
 main(defineArgs())

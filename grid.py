@@ -33,17 +33,23 @@ class Grid:
 
     def setStart(self, (x, y)):
         (width, height) = self.gridDimensions
-        if (0 <= x <= width) and (0 <= y <= height):
-            start = self.cells[x][y]
-            if start != self.goal:
-                self.start = start
+        # if (0 <= x <= width) and (0 <= y <= height):
+        start = self.cells[x][y]
+        if start != self.goal:
+            self.start = start
+            self.start.setBGColor((98, 117, 200))
+            self.start.showText = False
+            self.start.isStart = True
 
     def setGoal(self, (x, y)):
         (width, height) = self.gridDimensions
-        if (0 <= x <= width) and (0 <= y <= height):
-            goal = self.cells[x][y]
-            if goal != self.start:
-                self.goal = goal
+        # if (0 <= x <= width) and (0 <= y <= height):
+        goal = self.cells[x][y]
+        if goal != self.start:
+            self.goal = goal
+            self.goal.setBGColor((98, 117, 200))
+            self.goal.showText = False
+            self.goal.isGoal = True
 
     def getNeighbours(self, cell):
         (x, y) = cell.getIndex()
@@ -118,23 +124,31 @@ class Grid:
 
     def toFile(self, fileName):
         file = open(fileName, 'w')
-        text = 'A-STAR\n'
+        file.write('A-STAR\n')
 
         (gw, gh) = self.gridDimensions
         (cw, ch) = self.cellDimensions
-        text += 'GW {} GH {} CW {} CH {}\n'.format(gw, gh, cw, ch)
+        file.write('GW {}\nGH {}\nCW {}\nCH {}\n'.format(gw, gh, cw, ch))
 
         startCell = self.start
         goalCell = self.goal
-        text += 'S {}\n'.format(startCell.getIndex())
-        text += 'G {}\n'.format(goalCell.getIndex())
+        file.write('S {}\n'.format(startCell.getIndex()))
+        file.write('G {}\n'.format(goalCell.getIndex()))
 
-        text += 'B'
+        file.write('B')
         for row in self.cells:
             for cell in row:
 
                 if cell.isBlocked():
-                    text += ' {}'.format(cell.getIndex())
+                    file.write(' {}'.format(cell.getIndex()))
 
-        file.write(text)
         file.close()
+
+    def blockCell(self, (x, y)):
+        cell = self.cells[x][y]
+
+        if cell != self.start and cell != self.goal:
+            cell.blocked = True
+
+        cell.setBGColor((255, 255, 255))
+        cell.showText = False

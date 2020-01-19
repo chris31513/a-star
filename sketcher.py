@@ -16,6 +16,8 @@ class Sketcher:
 
                 # Drawing cell
                 self.pygame.draw.rect(self.canvas, (255, 255, 255), rect, 4)
+                if cell.isStart or cell.isGoal or cell.blocked:
+                    self.updateCell(cell)
 
         self.pygame.display.update()
 
