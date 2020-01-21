@@ -87,22 +87,27 @@ class Grid:
         return neighbours
 
     def mousePress(self, position):
-        (gridWidth, gridHeight) = self.gridDimensions
-        (cellWidth, cellHeight) = self.cellDimensions
+        try:
+            
+            (gridWidth, gridHeight) = self.gridDimensions
+            (cellWidth, cellHeight) = self.cellDimensions
 
-        y = position[0]
-        x = position[1]
+            y = position[0]
+            x = position[1]
 
-        row = x // ((gridWidth * cellWidth) // gridWidth)
-        col = y // ((gridHeight * cellHeight) // gridHeight)
-        cell = self.cells[row][col]
+            row = x // ((gridWidth * cellWidth) // gridWidth)
+            col = y // ((gridHeight * cellHeight) // gridHeight)
+            cell = self.cells[row][col]
 
-        if cell != self.start and cell != self.goal:
-            cell.blocked = True
+            if cell != self.start and cell != self.goal:
+                cell.blocked = True
 
-        cell.setBGColor((255, 255, 255))
-        cell.showText = False
-        return cell
+            cell.setBGColor((255, 255, 255))
+            cell.showText = False
+            return cell
+
+        except:
+            pass
 
     def setStartOrGoal(self, position):
         (gridWidth, gridHeight) = self.gridDimensions
