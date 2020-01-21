@@ -3,13 +3,16 @@ import random
 
 class Grid:
 
-    def __init__(self, (gridWidth, gridHeight), (cellWidth, cellHeight),
-                (xOffset, yOffset)):
-        self.gridDimensions = (gridWidth, gridHeight)
-        self.cellDimensions = (cellWidth, cellHeight)
+    def __init__(self, gridWidth_gridHeight, cellWidth_cellHeight,
+                xOffset_yOffset):
+        self.gridDimensions = gridWidth_gridHeight
+        gridWidth, gridHeight = gridWidth_gridHeight
+        self.cellDimensions = cellWidth_cellHeight
         self.cells = [[_ for _ in range(gridWidth)] for _ in range(gridHeight)]
         self.start = None
         self.goal = None
+        xOffset, yOffset = xOffset_yOffset
+        cellWidth, cellHeight = cellWidth_cellHeight
 
         for r in range(gridHeight):
             for c in range(gridWidth):
@@ -31,7 +34,7 @@ class Grid:
     def getGoal(self):
         return self.goal
 
-    def setStart(self, (x, y)):
+    def setStart(self, x_y):
         (width, height) = self.gridDimensions
         # if (0 <= x <= width) and (0 <= y <= height):
         start = self.cells[x][y]
@@ -41,7 +44,7 @@ class Grid:
             self.start.showText = False
             self.start.isStart = True
 
-    def setGoal(self, (x, y)):
+    def setGoal(self, x_y):
         (width, height) = self.gridDimensions
         # if (0 <= x <= width) and (0 <= y <= height):
         goal = self.cells[x][y]
@@ -144,7 +147,7 @@ class Grid:
 
         file.close()
 
-    def blockCell(self, (x, y)):
+    def blockCell(self, x_y):
         cell = self.cells[x][y]
 
         if cell != self.start and cell != self.goal:

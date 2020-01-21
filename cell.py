@@ -2,7 +2,9 @@ import math
 import random
 class Cell:
 
-    def __init__(self, (x, y), (w, h), index):
+    def __init__(self, x_y, w_h, index):
+        x, y = x_y
+        w, h = w_h
         self.coordinates = (x, y)
         self.dimensions = (w, h)
         self.index = index

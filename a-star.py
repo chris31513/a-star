@@ -138,7 +138,7 @@ def main(args):
 
     grid.toFile(args.output)
 
-def aStar(grid, (openSet, closedSet, done), sketcher):
+def aStar(grid, openSet_closedSet_done, sketcher):
 
     tmpG = 0
     tmpH = 0
